@@ -4,6 +4,8 @@ KERNEL_DEFCONFIG := defconfig radxa.config radxa_custom.config
 SUPPORT_CLEAN := false
 ALLWINNER_FIXUP := src/bsp \
 	src/arch/arm64/configs/bsp.config \
+	src/arch/arm64/configs/radxa.config \
+	src/arch/arm64/configs/radxa_custom.config \
 	src/arch/arm64/boot/dts/allwinner/sun60i-a733-cubie-a7a.dts \
 	src/arch/arm64/boot/dts/allwinner/sun60i-a733-cubie-a7s.dts \
 	src/arch/arm64/boot/dts/allwinner/sun60i-a733-cubie-a7z.dts \
@@ -18,6 +20,23 @@ src/bsp: $(SRC-KERNEL)
 
 src/arch/arm64/configs/bsp.config: $(SRC-KERNEL)
 	ln -sf ../../../../device-a733/configs/default/linux-5.15/bsp_defconfig $@
+
+src/arch/arm64/configs/radxa.config: $(SRC-KERNEL)
+	touch $@
+
+src/arch/arm64/configs/radxa_custom.config: $(SRC-KERNEL)
+	printf "CONFIG_REMOTEPROC=y
+CONFIG_AW_REMOTEPROC=y
+CONFIG_AW_REMOTEPROC_E906_BOOT=y
+CONFIG_RPMSG_VIRTIO=y
+CONFIG_AW_RPMSG_CTRL=y
+CONFIG_AW_RPMSG_NOTIFY=y
+CONFIG_AW_RPMSG_HEARTBEAT=y
+CONFIG_AW_RPBUF_DEV=y
+CONFIG_AW_RPBUF_SERVICE_RPMSG=y
+CONFIG_AW_RPBUF_CONTROLLER_SUNXI=y
+CONFIG_AW_RPBUF_SAMPLE_SUNXI=y
+" > $@
 
 bsp/ramfs/ramfs_aarch64.cpio.gz: $(SRC-KERNEL)
 	cd bsp/ramfs/ramfs_aarch64 && find . | fakeroot cpio -o -Hnewc | gzip > ../ramfs_aarch64.cpio.gz
